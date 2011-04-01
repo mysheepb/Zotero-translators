@@ -12,7 +12,7 @@
 }
 
 function detectWeb(doc, url) {
-	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct|func=myshelf-full.*)");
+	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full.*)");
 	
 	if(singleRe.test(doc.location.href)) {
 		return "book";
