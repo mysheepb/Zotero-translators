@@ -27,14 +27,29 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct|func=myshelf-full.*)");
+	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
 	var mab2Opac = new RegExp("^https?://[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*");
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
 	if(detailRe.test(uri)) {
-		var newuri = uri.replace(/\&format=[0-9]{3}/, "&format=001");
-		if (newuri == uri) newuri += "&format=001";
+		// find the 'add to basket' link where it will have the document number, replace the function with 'direct'
+		if (doc.evaluate('//*[contains(@href, "myshelf-add-ful-1")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var elmts_add = doc.evaluate('//*[contains(@href, "myshelf-add-ful-1")]', doc, null, XPathResult.ANY_TYPE, null);
+			var adduri = elmts_add.iterateNext().attributes.getNamedItem("href").value;
+			adduri = adduri.replace("myshelf-add-ful-1", "direct");
+			//adduri = adduri.replace("myshelf-add-ful-1", "myshelf-full");			
+			var baseuri = uri.match(".*\\?");
+			var funcuri = adduri.match("\\?.*");
+			newuri = baseuri + funcuri[0].match("[^\\?].*");
+			newuri += "&format=001";
+			//Zotero.debug('baseuri = ' + baseuri);
+			//Zotero.debug('funcuri = ' + funcuri);
+			Zotero.debug('directuri = ' + newuri);
+		} else {
+			var newuri = uri.replace(/\&format=[0-9]{3}/, "&format=001");
+			if (newuri == uri) newuri += "&format=001";
+		}
 		newUris.push(newuri);
 	} else {
 		var itemRegexp = '^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=999|func=direct|func=myshelf-full.*)'
