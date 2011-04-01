@@ -1,14 +1,14 @@
 {
-        "translatorID": "cf87eca8-041d-b954-795a-2d86348999d5",
-        "label": "Library Catalog (Aleph)",
-        "creator": "Simon Kornblith and Michael Berkowitz",
-        "target": "https?://[^/]+/F(?:/[A-Z0-9\\-]+(?:\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
-        "minVersion": "1.0.0b3.r1",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-24 18:11:46"
+	"translatorID":"cf87eca8-041d-b954-795a-2d86348999d5",
+	"translatorType":4,
+	"label":"Library Catalog (Aleph)",
+	"creator":"Simon Kornblith and Michael Berkowitz",
+	"target":"https?://[^/]+/F(?:/[A-Z0-9\\-]+(?:\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
+	"minVersion":"1.0.0b3.r1",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":true,
+	"lastUpdated":"2009-10-22 19:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -33,16 +33,9 @@ function doWeb(doc, url) {
 	var newUris = new Array();
 	
 	if(detailRe.test(uri)) {
-		var elmts_add = doc.evaluate('//*[contains(@href, "myshelf-add-ful-1")]', doc, null, XPathResult.ANY_TYPE, null);
-		var adduri = elmts_add.iterateNext().attributes.getNamedItem("href").value;
-		Zotero.debug('adduri = ' + adduri);
-		adduri = adduri.replace("myshelf-add-ful-1", "myshelf-full");
-		Zotero.debug('adduri = ' + adduri);
-		//var newuri = uri.replace(/\&format=[0-9]{3}/, "&format=001");
-		//if (newuri == uri) newuri += "&format=001";
-		var newuri = adduri += "&format=001";
-	        newUris.push(newuri);
-		//newUris.push(uri);
+		var newuri = uri.replace(/\&format=[0-9]{3}/, "&format=001");
+		if (newuri == uri) newuri += "&format=001";
+		newUris.push(newuri);
 	} else {
 		var itemRegexp = '^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=999|func=direct|func=myshelf-full.*)'
 		var items = Zotero.Utilities.getItemArray(doc, doc, itemRegexp, '^[0-9]+$');
@@ -88,14 +81,9 @@ function doWeb(doc, url) {
 		} : null;
 		var nonstandard = false;
 		var th = false;
-		var div = false;
 		var xpath;
-		Zotero.debug('**DEBUG content of newDoc');
-		Zotero.debug(newDoc.documentElement.textContent);
 		if (newDoc.evaluate('//*[tr[td/text()="LDR"]]/tr[td[2]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		//	xpath = '//*[tr[td/text()="LDR"]]/tr[td[2]]';
-			xpath = '//*[tr[td/text()="LDR"]]/tr';
-			Zotero.debug('**DEBUG if1');
+			xpath = '//*[tr[td/text()="LDR"]]/tr[td[2]]';
 		} else if (newDoc.evaluate('//*[tr[th/text()="LDR"]]/tr[td[1]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		  xpath = '//*[tr[th/text()="LDR"]]/tr[td[1]]';
 		  th = true;
@@ -108,23 +96,12 @@ function doWeb(doc, url) {
 		} else if (newDoc.evaluate('//tr/td[2]/table/tbody[tr/td[contains(text(), "LDR")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//tr/td[2]/table/tbody[tr/td[contains(text(), "LDR")]]/tr';
 			nonstandard = true;
-		} else if (newDoc.evaluate('//*[div[div/text()="LDR"]]/div[@class="fullLine"]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		//	xpath = '//div[@class="fullLine"]';
-		 	xpath = '//*[div[div/text()="LDR"]]/div[@class="fullLine"]';
-			div = true;
-Zotero.debug('**DEBUG if6');
 		}
-		Zotero.debug("div = " + div);
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
-Zotero.debug('elmts = ' + elmts.textContent);
 		var elmt;
 		var record = new marc.record();
-Zotero.debug('**DEBUG 7');
 		while(elmt = elmts.iterateNext()) {
-//Zotero.debug('elmt = ' + elmt.textContent);
-			if (div) {
-				var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./div[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			} else if (th) {
+			if (th) {
           var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./th', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
       } else {
           var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
@@ -137,9 +114,7 @@ Zotero.debug('**DEBUG 7');
      // var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			if(field) {
 				var value;
-				if (div) {
-					value = newDoc.evaluate('./div[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];	
-				} else if (th) {
+				if (th) {
 				    value = newDoc.evaluate('./TD[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
 				} else {
 				  value = newDoc.evaluate('./TD[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
