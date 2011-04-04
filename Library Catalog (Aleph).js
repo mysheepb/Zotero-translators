@@ -1,14 +1,14 @@
 {
-	"translatorID":"cf87eca8-041d-b954-795a-2d86348999d5",
-	"translatorType":4,
-	"label":"Library Catalog (Aleph)",
-	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"https?://[^/]+/F(?:/[A-Z0-9\\-]+(?:\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-10-22 19:00:00"
+        "translatorID": "cf87eca8-041d-b954-795a-2d86348999d5",
+        "label": "Library Catalog (Aleph)",
+        "creator": "Simon Kornblith, Michael Berkowitz, Ming Yeung Cheung",
+        "target": "https?://[^/]+/F(?:/[A-Z0-9\\-]+(?:\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
+        "minVersion": "1.0.0b3.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-04-04 12:38:11"
 }
 
 function detectWeb(doc, url) {
