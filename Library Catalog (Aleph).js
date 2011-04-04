@@ -12,7 +12,7 @@
 }
 
 function detectWeb(doc, url) {
-	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=[0-9]{3}|func=direct|func=myshelf-full.*)");
+	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myshelf_full.*)");
 	
 	if(singleRe.test(doc.location.href)) {
 		return "book";
@@ -27,7 +27,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
+	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myshelf_full.*)");
 	var mab2Opac = new RegExp("^https?://[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*");
 	var uri = doc.location.href;
 	var newUris = new Array();
@@ -96,6 +96,7 @@ function doWeb(doc, url) {
 		} : null;
 		var nonstandard = false;
 		var th = false;
+		var div = false;
 		var xpath;
 		if (newDoc.evaluate('//*[tr[td/text()="LDR"]]/tr[td[2]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//*[tr[td/text()="LDR"]]/tr[td[2]]';
@@ -111,14 +112,19 @@ function doWeb(doc, url) {
 		} else if (newDoc.evaluate('//tr/td[2]/table/tbody[tr/td[contains(text(), "LDR")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//tr/td[2]/table/tbody[tr/td[contains(text(), "LDR")]]/tr';
 			nonstandard = true;
+		} else if (newDoc.evaluate('//*[div[div/text()="LDR"]]/div[@class="fullLine"]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		 	xpath = '//*[div[div/text()="LDR"]]/div[@class="fullLine"]';
+			div = true;
 		}
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt;
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
 			if (th) {
-          var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./th', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-      } else {
+          		var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./th', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+      		} else if (div) {
+				var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./div[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			} else {
           var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
       }
       // if (nonstandard) {
@@ -131,6 +137,8 @@ function doWeb(doc, url) {
 				var value;
 				if (th) {
 				    value = newDoc.evaluate('./TD[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
+				} else if (div) {
+					value = newDoc.evaluate('./div[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];	
 				} else {
 				  value = newDoc.evaluate('./TD[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
 				}
